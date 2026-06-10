@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-navy-950 text-slate-100 font-sans;
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Thin custom scrollbar for the validation table container */
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+  }
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    @apply bg-navy-600 rounded-full;
+  }
+  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    @apply bg-navy-500;
+  }
+
+  /* Vertical scrollbar for the page */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-navy-950;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-navy-700 rounded-full;
+  }
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>POS File Checker</title>
+    <!--
+      GitHub Pages SPA redirect.
+      Stores the full URL in sessionStorage, then redirects to the base
+      index.html. The decode script in index.html picks it up and restores
+      the path in the browser history before React mounts.
+
+      segmentCount = 1 works for deployments under a sub-path like
+        https://username.github.io/repo-name/
+      Change to 0 for a custom root domain.
+    -->
+    <script>
+      sessionStorage.redirect = location.href;
+      var segmentCount = 1;
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/'
+      );
+    </script>
+  </head>
+  <body>Redirecting…</body>
+</html>
