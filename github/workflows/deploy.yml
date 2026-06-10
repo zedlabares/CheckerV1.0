@@ -1,0 +1,92 @@
+# ============================================================
+# .github/workflows/deploy.yml
+#
+# Automatically builds and deploys the POS File Checker to
+# GitHub Pages on every push to the main branch.
+#
+# How it works:
+#   1. Checks out the repository
+#   2. Installs Node.js 20 and caches npm dependencies
+#   3. Runs `npm ci` for a clean, reproducible install
+#   4. Builds the Vite + PWA bundle with the correct --base path
+#      (derived from the repository name automatically)
+#   5. Uploads dist/ as a GitHub Pages artifact
+#   6. Deploys the artifact to GitHub Pages
+#
+# Required GitHub repository settings:
+#   Settings → Pages → Source → GitHub Actions
+#
+# The deployed URL will be:
+#   https://<your-username>.github.io/<your-repo-name>/
+# ============================================================
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main        # Deploy on every push to main
+  workflow_dispatch: # Allow manual trigger from the Actions tab
+
+# Sets permissions of the GITHUB_TOKEN to allow Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment runs at a time; cancel any in-progress run
+# when a new push arrives so Pages always reflects the latest commit
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # ── Job 1: Build ──────────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'          # Cache ~/.npm between runs
+
+      - name: Install dependencies
+        run: npm ci               # Reproducible install from package-lock.json
+
+      - name: Type-check TypeScript
+        run: npx tsc --noEmit     # Fail fast if there are type errors
+
+      - name: Build for GitHub Pages
+        # Derive the base path from the repository name.
+        # github.repository is "owner/repo-name"; we extract "repo-name".
+        # If you use a custom domain or deploy to the root, change this to:
+        #   VITE_BASE: /
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/
+        run: npm run build        # vite.config.ts reads VITE_BASE env var
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist              # Upload the Vite build output
+
+  # ── Job 2: Deploy ─────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy
+    needs: build                  # Only deploy if build succeeded
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
